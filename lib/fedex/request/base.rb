@@ -130,6 +130,7 @@ module Fedex
             xml.PersonName @shipper[:name]
             xml.CompanyName @shipper[:company]
             xml.PhoneNumber @shipper[:phone_number]
+            xml.EMailAddress @shipper[:email]
           }
           xml.Address {
             Array(@shipper[:address]).take(2).each do |address_line|
@@ -170,6 +171,7 @@ module Fedex
             xml.PersonName @recipient[:name]
             xml.CompanyName @recipient[:company]
             xml.PhoneNumber @recipient[:phone_number]
+            xml.EMailAddress @shipper[:email]
           }
           xml.Address {
             Array(@recipient[:address]).take(2).each do |address_line|
