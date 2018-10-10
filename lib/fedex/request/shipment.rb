@@ -26,6 +26,7 @@ module Fedex
         api_response = self.class.post api_url, :body => build_xml
         puts api_response if @debug
         response = parse_response(api_response)
+
         if success?(response)
           success_response(api_response, response)
         else
@@ -47,7 +48,7 @@ module Fedex
           add_origin(xml) if @origin
           add_recipient(xml)
           add_shipping_charges_payment(xml)
-          add_special_services(xml) if @shipping_options[:return_reason] || @shipping_options[:cod] || @shipping_options[:saturday_delivery]
+          add_special_services(xml)
           add_customs_clearance(xml) if @customs_clearance_detail
           add_custom_components(xml)
           xml.RateRequestTypes "ACCOUNT"
@@ -99,7 +100,48 @@ module Fedex
       end
 
       def add_special_services(xml)
-        xml.SpecialServicesRequested {
+        xml.SpecialServicesRequested{
+          xml.SpecialServiceTypes "EVENT_NOTIFICATION"
+          xml.EventNotificationDetail{
+            xml.EventNotifications{
+              xml.Role "SHIPPER"
+              xml.Events "ON_DELIVERY"
+              xml.Events "ON_ESTIMATED_DELIVERY"
+              xml.Events "ON_EXCEPTION"
+              xml.Events "ON_SHIPMENT"
+              xml.Events "ON_TENDER"
+              xml.NotificationDetail{
+                xml.NotificationType "EMAIL"
+                xml.EmailDetail{
+                  xml.EmailAddress @shipping_options[:shipper_email]
+                }
+                xml.Localization{
+                  xml.LanguageCode "EN"
+                }
+              }
+              xml.FormatSpecification{
+                xml.Type "TEXT"
+              }
+            }
+            xml.EventNotifications{
+              xml.Role "RECIPIENT"
+              xml.Events "ON_DELIVERY"
+              xml.Events "ON_EXCEPTION"
+              xml.Events "ON_SHIPMENT"
+              xml.NotificationDetail{
+                xml.NotificationType "EMAIL"
+                xml.EmailDetail{
+                  xml.EmailAddress @shipping_options[:recipient_email]
+                }
+                xml.Localization{
+                  xml.LanguageCode "EN"
+                }
+              }
+              xml.FormatSpecification{
+                xml.Type "TEXT"
+              }
+            }
+          }
           if @shipping_options[:return_reason]
             xml.SpecialServiceTypes "RETURN_SHIPMENT"
             xml.ReturnShipmentDetail {
@@ -150,6 +192,7 @@ module Fedex
             add_requested_shipment(xml)
           }
         end
+
         builder.doc.root.to_xml
       end
 
