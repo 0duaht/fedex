@@ -128,6 +128,7 @@ module Fedex
               xml.Events "ON_DELIVERY"
               xml.Events "ON_EXCEPTION"
               xml.Events "ON_SHIPMENT"
+              xml.Events "ON_TENDER"
               xml.NotificationDetail{
                 xml.NotificationType "EMAIL"
                 xml.EmailDetail{
